@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sigma.js İnteraktif Graph</title>
+    <style>
+        #graph-container {
+            width: 100%;
+            height: 900px;
+            background-color: #1a1a1a;
+        }
+        #controls {
+            padding: 10px;
+            background: #f0f0f0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        input {
+            padding: 8px;
+            width: 100px;
+        }
+        button {
+            padding: 8px 15px;
+            cursor: pointer;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sigma.js/1.2.1/sigma.min.js"></script>
+</head>
+<body>
+    <div id="controls">
+        <input type="number" id="nodeCount" min="1" max="10000" value="100" placeholder="Node sayısı">
+        <button onclick="updateGraph()">Grafiği Güncelle</button>
+    </div>
+    <div id="graph-container"></div>
+    <script>
+        let s;
+
+        function initializeSigma() {
+            if (s) {
+                s.kill();
+            }
+            s = new sigma({
+                container: 'graph-container',
+                settings: {
+                    defaultNodeColor: '#3388ff',
+                    defaultEdgeColor: '#888',
+                    edgeColor: 'default',
+                    minNodeSize: 3,
+                    maxNodeSize: 10,
+                    minEdgeSize: 1,
+                    maxEdgeSize: 3
+                }
+            });
+        }
+
+        function createGraph(nodeCount) {
+            initializeSigma();
+
+            // Node'ları oluştur
+            for (let i = 0; i < nodeCount; i++) {
+                s.graph.addNode({
+                    id: 'n' + i,
+                    label: 'Node ' + i,
+                    x: Math.random() * 100,
+                    y: Math.random() * 100,
+                    size: 2 + Math.random() * 7,
+                    color: '#' + Math.floor(Math.random()*16777215).toString(16)
+                });
+            }
+
+            // Rastgele bağlantılar oluştur
+            const edgeCount = Math.min(nodeCount * 2, 1000); // Node sayısının 2 katı kadar bağlantı, maksimum 1000
+            for (let i = 0; i < edgeCount; i++) {
+                const source = 'n' + Math.floor(Math.random() * nodeCount);
+                const target = 'n' + Math.floor(Math.random() * nodeCount);
+                if (source !== target) {
+                    s.graph.addEdge({
+                        id: 'e' + i,
+                        source: source,
+                        target: target,
+                        size: 1 + Math.random() * 2
+                    });
+                }
+            }
+
+            s.refresh();
+        }
+
+        function updateGraph() {
+            const nodeCount = parseInt(document.getElementById('nodeCount').value) || 100;
+            if (nodeCount < 1) {
+                alert('Lütfen en az 1 node giriniz!');
+                return;
+            }
+            if (nodeCount > 10000) {
+                alert('Maksimum 10000 node ekleyebilirsiniz!');
+                return;
+            }
+            createGraph(nodeCount);
+        }
+
+        // Başlangıçta 100 node ile grafiği oluştur
+        createGraph(100);
+    </script>
+</body>
+</html>
